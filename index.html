@@ -10,6 +10,7 @@
       min-height: 100vh;
       display: flex;
       align-items: center;
+      flex-direction: column;
       justify-content: center;
       background: linear-gradient(135deg, #0a1a3f, #1f3a6e);
       font-family: "Malgun Gothic", sans-serif;
@@ -24,9 +25,23 @@
       background-color: rgba(10, 26, 63, 0.6);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     }
+    a {
+      color: #8fa8d8;
+      text-decoration: none;
+      font-size: 1.1rem;
+      padding: 0.6rem 1.4rem;
+      border: 1px solid #8fa8d8;
+      border-radius: 999px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    a:hover {
+      background-color: #8fa8d8;
+      color: #0a1a3f;
+    }
   </style>
 </head>
 <body>
   <h1>안녕하세여</h1>
+  <a href="about.html">About 페이지로 가기 →</a>
 </body>
 </html>
