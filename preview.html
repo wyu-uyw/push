@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Todos</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1f2328; --muted:#6b7280; --line:#e5e7eb; --accent:#3b82f6; --ok:#16a34a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#0f1115; --card:#181b21; --text:#e6e8eb; --muted:#9aa1ab; --line:#2a2f37; --accent:#60a5fa; --ok:#4ade80; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font-family: system-ui, "Malgun Gothic", sans-serif; }
+  main { max-width: 640px; margin: 40px auto; padding: 0 16px; }
+  h1 { font-size: 1.5rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 20px; font-size: .9rem; }
+  ul { list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+  li { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:14px 16px; display:flex; align-items:center; gap:12px; }
+  .check { width:22px; height:22px; border-radius:50%; border:2px solid var(--line); flex:none; display:grid; place-items:center; font-size:13px; }
+  li.done .check { background:var(--ok); border-color:var(--ok); color:#fff; }
+  li.done .title { text-decoration: line-through; color: var(--muted); }
+  .body { flex:1; min-width:0; }
+  .title { font-weight:600; }
+  .meta { color:var(--muted); font-size:.85rem; margin-top:2px; }
+  .amount { font-variant-numeric: tabular-nums; color:var(--accent); font-weight:600; }
+  .msg { color:var(--muted); padding:20px 0; }
+  .err { color:#dc2626; }
+  button { margin-bottom:16px; padding:6px 12px; border-radius:8px; border:1px solid var(--line); background:var(--card); color:var(--text); cursor:pointer; }
+</style>
+</head>
+<body>
+<main>
+  <h1>할 일 목록</h1>
+  <p class="sub">Supabase <code>test_todos</code> 테이블</p>
+  <button id="reload">새로고침</button>
+  <div id="status" class="msg">불러오는 중…</div>
+  <ul id="list"></ul>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+  const SUPABASE_URL = 'https://ohqipiguursprztnehsj.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_7utdYCZelc_dik_tX062sw_slFup6RF';
+  const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const listEl = document.getElementById('list');
+  const statusEl = document.getElementById('status');
+
+  function esc(s) {
+    return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  async function load() {
+    statusEl.textContent = '불러오는 중…';
+    statusEl.className = 'msg';
+    listEl.innerHTML = '';
+    const { data, error } = await client.from('test_todos').select('*').order('due_date', { ascending: true });
+    if (error) {
+      statusEl.textContent = '오류: ' + error.message;
+      statusEl.className = 'msg err';
+      return;
+    }
+    if (!data.length) {
+      statusEl.textContent = '데이터가 없습니다.';
+      return;
+    }
+    statusEl.textContent = `총 ${data.length}개`;
+    listEl.innerHTML = data.map(t => `
+      <li class="${t.done ? 'done' : ''}">
+        <span class="check">${t.done ? '✓' : ''}</span>
+        <div class="body">
+          <div class="title">${esc(t.title)}</div>
+          <div class="meta">마감일: ${esc(t.due_date ?? '-')} · ${t.done ? '완료' : '미완료'}</div>
+        </div>
+        <span class="amount">× ${esc(t.amount ?? 0)}</span>
+      </li>`).join('');
+  }
+
+  document.getElementById('reload').addEventListener('click', load);
+  load();
+</script>
+</body>
+</html>
